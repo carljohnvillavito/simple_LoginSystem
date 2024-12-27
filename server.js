@@ -116,12 +116,12 @@ app.post('/register', async (req, res) => {
         if (existingUser) {
             return res.render('register', { error: "User already exists" });
         }
-         const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({fullName, username, password: hashedPassword });
         await newUser.save();
-        res.redirect('/login');
+        res.render('register', { success: "Account created successfully!" });
     } catch (error) {
-         console.error('Registration error:', error);
+        console.error('Registration error:', error);
         res.render('register', { error: 'An error occurred' });
     }
 });

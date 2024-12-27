@@ -40,6 +40,7 @@ store.on('error', function(error) {
 
 // User schema
 const userSchema = new mongoose.Schema({
+    fullName: { type: String, required: true },
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
 });
@@ -57,7 +58,7 @@ app.use(session({
     cookie: {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24, // 1 day
-      }
+        }
 }));
 
 // Middleware to check if user is logged in
@@ -67,13 +68,18 @@ function isLoggedIn(req, res, next) {
     }
     res.redirect('/login');
 }
-
+function isLoggedOut(req, res, next) {
+  if (!req.session.userId) {
+      return next();
+  }
+  res.redirect('/dashboard');
+}
 // Routes
 app.get('/', (req, res) => {
     res.redirect('/login')
 });
 
-app.get('/login', (req, res) => {
+app.get('/login', isLoggedOut, (req, res) => {
     res.render('login');
 });
 
@@ -86,7 +92,7 @@ app.post('/login', async (req, res) => {
             req.session.userId = user._id;
             res.redirect('/dashboard');
         } else {
-            res.render('login', { error: 'Invalid credentials' });
+            res.render('login', { error: 'Incorrect username or password' });
         }
     } catch (error) {
         console.error('Login error:', error);
@@ -94,20 +100,28 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.get('/register', (req, res) => {
+app.get('/register', isLoggedOut, (req, res) => {
     res.render('register');
 });
 
 app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
+    const { fullName, username, password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+        return res.render('register', { error: "Passwords do not match" });
+    }
 
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ username, password: hashedPassword });
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.render('register', { error: "User already exists" });
+        }
+         const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({fullName, username, password: hashedPassword });
         await newUser.save();
         res.redirect('/login');
     } catch (error) {
-        console.error('Registration error:', error);
+         console.error('Registration error:', error);
         res.render('register', { error: 'An error occurred' });
     }
 });
@@ -126,19 +140,19 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/admin/users', async (req, res) => {
-  try {
+try {
     const users = await User.find({});
     res.json(users); // Send the user data back as JSON
-  } catch (error) {
+} catch (error) {
     console.error('Error getting users:', error);
     res.status(500).send('Error getting users');
-  }
+}
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Internal Server Error');
+console.error(err.stack);
+res.status(500).send('Internal Server Error');
 });
 
 app.listen(PORT, () => {

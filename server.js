@@ -6,12 +6,23 @@ const session = require('express-session');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const mongoURI = process.env.MONGODB_URI;
+
+// Error handling to catch unhandled promise rejections
+process.on('unhandledRejection', (reason, p) => {
+  console.error('Unhandled Rejection at:', p, 'reason:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
 
 // Database connection
-const mongoURI = process.env.MONGODB_URI;
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoURI)
 .then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1); // Exit process in case of db connection issue.
+});
 
 // User schema
 const userSchema = new mongoose.Schema({
@@ -91,11 +102,19 @@ app.get('/dashboard', isLoggedIn, (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/login');
-      });
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+      }
+      res.redirect('/login');
+    });
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Internal Server Error');
+});
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

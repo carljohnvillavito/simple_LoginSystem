@@ -46,8 +46,13 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
+
+// In-memory message storage (replace with a database in production)
+const messages = [];
+
 // Middleware
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json())
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.use(session({
@@ -126,8 +131,15 @@ app.post('/register', async (req, res) => {
     }
 });
 
-app.get('/dashboard', isLoggedIn, (req, res) => {
-    res.render('dashboard', { username: req.session.userId});
+app.get('/dashboard', isLoggedIn, async (req, res) => {
+    try {
+       const user = await User.findById(req.session.userId)
+       const username = user.username;
+      res.render('dashboard', { username: username });
+    } catch(error) {
+      console.error('Error getting username: ', error)
+      res.status(500).send('Error getting username')
+    }
 });
 
 app.get('/logout', (req, res) => {
@@ -140,19 +152,38 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/admin/users', async (req, res) => {
-try {
-    const users = await User.find({});
-    res.json(users); // Send the user data back as JSON
-} catch (error) {
-    console.error('Error getting users:', error);
-    res.status(500).send('Error getting users');
-}
+  try {
+      const users = await User.find({});
+      res.json(users); // Send the user data back as JSON
+  } catch (error) {
+      console.error('Error getting users:', error);
+      res.status(500).send('Error getting users');
+  }
 });
+
+app.post('/chat/send', isLoggedIn, async (req, res) => {
+    const { message } = req.body;
+    try{
+        const user = await User.findById(req.session.userId);
+        const username = user.username;
+         const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+         messages.push({ username, message, timestamp });
+         res.status(200).send();
+    }catch(error){
+       console.error("Error sending message:", error);
+       res.status(500).send("Error sending message");
+    }
+});
+
+app.get('/chat/messages', isLoggedIn, (req, res) => {
+    res.json(messages);
+});
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-console.error(err.stack);
-res.status(500).send('Internal Server Error');
+    console.error(err.stack);
+    res.status(500).send('Internal Server Error');
 });
 
 app.listen(PORT, () => {

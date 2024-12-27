@@ -10,7 +10,7 @@
     <div class="container">
         <h1>Register</h1>
         <% if (error) { %>
-            <p class="error"><%= error %></p>
+            <p class="error"><%= error || '' %></p>
         <% } %>
         <form action="/register" method="post">
             <input type="text" name="username" placeholder="Username" required>

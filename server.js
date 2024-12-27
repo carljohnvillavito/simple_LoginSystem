@@ -1,4 +1,4 @@
-    require('dotenv').config();
+   require('dotenv').config();
     const express = require('express');
     const mongoose = require('mongoose');
     const bcrypt = require('bcrypt');
@@ -164,25 +164,15 @@
         }
     });
 
-    app.post('/chat/send', isLoggedIn, async (req, res) => {
-        const { message } = req.body;
-        try {
-            const user = await User.findById(req.session.userId);
-            const username = user.username;
-            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const newMessage = new Message({username, message, timestamp});
-            await newMessage.save();
-            res.status(200).send();
-        } catch(error) {
-            console.error("Error sending message:", error);
-            res.status(500).send("Error sending message");
-        }
-    });
+   app.post('/chat/send', isLoggedIn, (req, res) => {
+         console.log("message was received", req.body);
+          res.status(200).send();
+      });
 
     app.get('/chat/messages', isLoggedIn, async (req, res) => {
-        try {
+      try {
           const messages = await Message.find({}).sort({_id: -1}).limit(20)
-          res.json(messages);
+            res.json(messages);
         } catch (error) {
           console.error('Error fetching messages:', error);
           res.status(500).send('Error fetching messages');

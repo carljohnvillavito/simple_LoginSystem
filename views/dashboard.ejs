@@ -7,15 +7,16 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to Your Dashboard</h1>
-        <p>Your user ID: <%= username %></p>
-        <a href="/logout" class="logout-btn">Logout</a>
-        <button class="logout-btn" id="usersButton">Get Users</button>
-    </div>
-    <div class="container" id="userDataContainer" style="display:none;">
-      <h2>User Data</h2>
-        <div id="userData">
+    <div id="dashboardWrapper">
+        <div class="container">
+            <h1>Welcome to Your Dashboard</h1>
+            <p>Your user ID: <%= username %></p>
+            <a href="/logout" class="logout-btn">Logout</a>
+            <button class="logout-btn" id="usersButton">Get Users</button>
+        </div>
+        <div class="container" id="userDataContainer" style="display:none;">
+            <h2>User Data</h2>
+            <div id="userData"></div>
         </div>
     </div>
     <script src="/js/script.js"></script>

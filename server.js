@@ -1,9 +1,10 @@
-   require('dotenv').config();
+ require('dotenv').config();
     const express = require('express');
     const mongoose = require('mongoose');
     const bcrypt = require('bcrypt');
     const session = require('express-session');
     const MongoDBStore = require('connect-mongodb-session')(session);
+    const moment = require('moment');
 
     const app = express();
     const PORT = process.env.PORT || 3000;
@@ -44,15 +45,6 @@
     });
     const User = mongoose.model('User', userSchema);
 
-    // Message schema
-    const messageSchema = new mongoose.Schema({
-        username: { type: String, required: true },
-        message: { type: String, required: true },
-        timestamp: { type: String, required: true },
-    });
-
-    const Message = mongoose.model('Message', messageSchema);
-
     // Middleware
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json())
@@ -66,7 +58,7 @@
         cookie: {
             httpOnly: true,
             maxAge: 1000 * 60 * 60 * 24, // 1 day
-            }
+        }
     }));
 
     // Middleware to check if user is logged in
@@ -96,17 +88,18 @@
 
         try {
             const user = await User.findOne({ username });
-            if (user && await bcrypt.compare(password, user.password)) {
+             if (user && await bcrypt.compare(password, user.password)) {
                 req.session.userId = user._id;
-                res.redirect('/dashboard');
-            } else {
-                res.render('login', { error: 'Incorrect username or password' });
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            res.render('login', { error: 'An error occurred' });
-        }
-    });
+                 req.session.lastLogin = new Date();
+                 res.redirect('/dashboard');
+             } else {
+                 res.render('login', { error: 'Incorrect username or password' });
+              }
+          } catch (error) {
+             console.error('Login error:', error);
+              res.render('login', { error: 'An error occurred' });
+           }
+     });
 
     app.get('/register', isLoggedOut, (req, res) => {
         res.render('register');
@@ -138,7 +131,11 @@
         try {
             const user = await User.findById(req.session.userId)
             const username = user.username;
-            res.render('dashboard', { username: username });
+            const now = moment();
+           const lastLogin =  req.session.lastLogin ? moment(req.session.lastLogin): null;
+             const isNewUser = lastLogin ? now.diff(lastLogin, 'minutes') <= 5 : true;
+             const welcomeMessage = isNewUser ? `Welcome new user!, ${username}.` : `Welcome back, ${username}!`;
+              res.render('dashboard', { username: username, welcomeMessage: welcomeMessage });
         } catch(error) {
             console.error('Error getting username: ', error)
             res.status(500).send('Error getting username')
@@ -161,21 +158,6 @@
         } catch (error) {
             console.error('Error getting users:', error);
             res.status(500).send('Error getting users');
-        }
-    });
-
-   app.post('/chat/send', isLoggedIn, (req, res) => {
-         console.log("message was received", req.body);
-          res.status(200).send();
-      });
-
-    app.get('/chat/messages', isLoggedIn, async (req, res) => {
-      try {
-          const messages = await Message.find({}).sort({_id: -1}).limit(20)
-            res.json(messages);
-        } catch (error) {
-          console.error('Error fetching messages:', error);
-          res.status(500).send('Error fetching messages');
         }
     });
 

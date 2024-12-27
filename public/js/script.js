@@ -1,90 +1,89 @@
-        document.addEventListener('DOMContentLoaded', function() {
-             const registerForm = document.getElementById('registerForm');
-            const successPopup = document.getElementById('successPopup');
-             const successMessage = document.getElementById('successMessage');
-            const closePopup = document.getElementById('closePopup');
-            const passwordFields = document.querySelectorAll("input[type='password']");
-            const welcomeTextElement = document.getElementById('welcomeText');
-            const welcomeMessage = welcomeTextElement.textContent;
+  document.addEventListener('DOMContentLoaded', function() {
+        const registerForm = document.getElementById('registerForm');
+         const successPopup = document.getElementById('successPopup');
+         const successMessage = document.getElementById('successMessage');
+         const closePopup = document.getElementById('closePopup');
+        const passwordFields = document.querySelectorAll("input[type='password']");
+         const welcomeTextElement = document.getElementById('welcomeText');
+          const welcomeMessage = welcomeTextElement.textContent;
+         console.log("initial text is", welcomeTextElement.textContent)
 
-                function typeText(index) {
-                     if (index < welcomeMessage.length) {
-                        welcomeTextElement.textContent = welcomeMessage.substring(0, index + 1) ;
-                         setTimeout(() => typeText(index+1), 30);
-                   } else{
-                         setTimeout(()=> {
-                            welcomeTextElement.textContent = '';
-                             typeText(0);
-                       },2000)
-                     }
-                }
-             typeText(0);
+            function typeText(index) {
+                 if (index < welcomeMessage.length) {
+                     welcomeTextElement.textContent = welcomeMessage.substring(0, index + 1) ;
+                    setTimeout(() => typeText(index+1), 30);
+               } else{
+                      setTimeout(()=> {
+                           welcomeTextElement.textContent = '';
+                            typeText(0);
+                    },2000)
+                    }
+            }
+            typeText(0);
 
 
+        if (registerForm) {
+                registerForm.addEventListener('submit', function(event) {
+                  event.preventDefault();
+                 const formData = new URLSearchParams(new FormData(registerForm)).toString();
 
-                if (registerForm) {
-                    registerForm.addEventListener('submit', function(event) {
-                      event.preventDefault();
-                      const formData = new URLSearchParams(new FormData(registerForm)).toString();
-
-                      fetch('/register', {
-                         method: 'POST',
-                         headers: {
-                             'Content-Type': 'application/x-www-form-urlencoded',
-                          },
-                          body: formData,
-                       })
-                         .then(response => {
-                            if (response.ok) {
-                                 return response.text();
-                            } else {
-                                 throw new Error('Registration failed');
-                            }
-                         })
-                         .then(html => {
-                             const parser = new DOMParser();
-                             const doc = parser.parseFromString(html, 'text/html');
-                             const errorMessage = doc.querySelector('.error');
-                              if(errorMessage){
+                  fetch('/register', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/x-www-form-urlencoded',
+                     },
+                      body: formData,
+                   })
+                     .then(response => {
+                       if (response.ok) {
+                            return response.text();
+                        } else {
+                             throw new Error('Registration failed');
+                        }
+                     })
+                    .then(html => {
+                          const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const errorMessage = doc.querySelector('.error');
+                          if(errorMessage){
                                   successMessage.textContent = '';
-                                  successPopup.style.display = 'block';
-                                  successMessage.textContent = errorMessage.textContent;
-                              }
-                              else {
-                                  const successText = doc.querySelector('#successMessage').textContent;
-                                  successMessage.textContent = successText;
-                                  successPopup.style.display = 'block';
-                                  passwordFields.forEach(field => {
-                                    field.value = '';
-                                   });
-                                 registerForm.reset();
+                                   successPopup.style.display = 'block';
+                                   successMessage.textContent = errorMessage.textContent;
                             }
+                            else {
+                                const successText = doc.querySelector('#successMessage').textContent;
+                                  successMessage.textContent = successText;
+                                    successPopup.style.display = 'block';
+                                    passwordFields.forEach(field => {
+                                        field.value = '';
+                                     });
+                                    registerForm.reset();
+                              }
 
-                         })
-                         .catch(error => {
-                           successMessage.textContent = 'An error occurred during registration.';
+                          })
+                       .catch(error => {
+                         successMessage.textContent = 'An error occurred during registration.';
                            successPopup.style.display = 'block';
-                            console.error(error);
+                             console.error(error);
                        });
-                    });
-               }
+                 });
+           }
+            closePopup.addEventListener('click', function() {
+                 successPopup.style.display = 'none';
+            });
 
-               closePopup.addEventListener('click', function() {
-                    successPopup.style.display = 'none';
-               });
 
-
-        });
+     });
 
      function togglePassword(inputId) {
-         const passwordInput = document.getElementById(inputId);
+          const passwordInput = document.getElementById(inputId);
         if (passwordInput.type === "password") {
               passwordInput.type = "text";
         } else {
              passwordInput.type = "password";
-      }
+        }
     }
-    document.getElementById('usersButton').addEventListener('click', function(event) {
+   document.getElementById('usersButton').addEventListener('click', function(event) {
             event.preventDefault();
             fetch('/admin/users')
                 .then(response => response.json())
@@ -108,13 +107,13 @@
                         const copyButton = document.createElement('button');
                         copyButton.textContent = 'Copy';
                         copyButton.classList.add('copy-button');
-                        copyButton.addEventListener('click', function() {
-                            navigator.clipboard.writeText(user.password)
-                                .then(() => {
-                                    alert('Password copied to clipboard!');
-                                })
-                            .catch(error => console.error('Failed to copy password:', error));
-                            });
+                            copyButton.addEventListener('click', function() {
+                                navigator.clipboard.writeText(user.password)
+                                    .then(() => {
+                                        alert('Password copied to clipboard!');
+                                    })
+                                .catch(error => console.error('Failed to copy password:', error));
+                                });
                         passwordContainer.appendChild(copyButton);
                         passwordContainer.appendChild(passwordField);
 
@@ -127,4 +126,4 @@
                     });
                 })
                 .catch(error => console.error('Error getting users:', error));
-        });
+       });

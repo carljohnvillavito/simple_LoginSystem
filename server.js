@@ -11,19 +11,19 @@ const mongoURI = process.env.MONGODB_URI;
 
 // Error handling to catch unhandled promise rejections
 process.on('unhandledRejection', (reason, p) => {
-  console.error('Unhandled Rejection at:', p, 'reason:', reason);
+    console.error('Unhandled Rejection at:', p, 'reason:', reason);
 });
 process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
+    console.error('Uncaught Exception:', err);
 });
 
 // Database connection
 mongoose.connect(mongoURI)
-.then(() => console.log('MongoDB connected'))
-.catch(err => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1); // Exit process in case of db connection issue.
-});
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => {
+        console.error('MongoDB connection error:', err);
+        process.exit(1); // Exit process in case of db connection issue.
+    });
 
 
 // Session Store
@@ -69,15 +69,15 @@ app.use(session({
 // Middleware to check if user is logged in
 function isLoggedIn(req, res, next) {
     if (req.session.userId) {
-    return next();
+        return next();
     }
     res.redirect('/login');
 }
 function isLoggedOut(req, res, next) {
-  if (!req.session.userId) {
-      return next();
-  }
-  res.redirect('/dashboard');
+    if (!req.session.userId) {
+        return next();
+    }
+    res.redirect('/dashboard');
 }
 // Routes
 app.get('/', (req, res) => {
@@ -133,46 +133,46 @@ app.post('/register', async (req, res) => {
 
 app.get('/dashboard', isLoggedIn, async (req, res) => {
     try {
-       const user = await User.findById(req.session.userId)
-       const username = user.username;
-      res.render('dashboard', { username: username });
+        const user = await User.findById(req.session.userId)
+        const username = user.username;
+        res.render('dashboard', { username: username });
     } catch(error) {
-      console.error('Error getting username: ', error)
-      res.status(500).send('Error getting username')
+        console.error('Error getting username: ', error)
+        res.status(500).send('Error getting username')
     }
 });
 
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
-    if (err) {
-        console.error("Error destroying session:", err);
-    }
-    res.redirect('/login');
+        if (err) {
+            console.error("Error destroying session:", err);
+        }
+        res.redirect('/login');
     });
 });
 
 app.get('/admin/users', async (req, res) => {
-  try {
-      const users = await User.find({});
-      res.json(users); // Send the user data back as JSON
-  } catch (error) {
-      console.error('Error getting users:', error);
-      res.status(500).send('Error getting users');
-  }
+    try {
+        const users = await User.find({});
+        res.json(users); // Send the user data back as JSON
+    } catch (error) {
+        console.error('Error getting users:', error);
+        res.status(500).send('Error getting users');
+    }
 });
 
 app.post('/chat/send', isLoggedIn, async (req, res) => {
     const { message } = req.body;
-    try{
+     try{
         const user = await User.findById(req.session.userId);
         const username = user.username;
-         const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
          messages.push({ username, message, timestamp });
          res.status(200).send();
-    }catch(error){
-       console.error("Error sending message:", error);
-       res.status(500).send("Error sending message");
-    }
+     }catch(error){
+         console.error("Error sending message:", error);
+        res.status(500).send("Error sending message");
+     }
 });
 
 app.get('/chat/messages', isLoggedIn, (req, res) => {

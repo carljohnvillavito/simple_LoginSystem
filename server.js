@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +25,19 @@ mongoose.connect(mongoURI)
   process.exit(1); // Exit process in case of db connection issue.
 });
 
+
+// Session Store
+const store = new MongoDBStore({
+    uri: mongoURI,
+    collection: 'sessions', // Collection where sessions will be stored
+    expires: 1000 * 60 * 60 * 24, // 1 day expiration,
+});
+
+store.on('error', function(error) {
+    console.log(error);
+});
+
+
 // User schema
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
@@ -39,6 +53,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: store,
     cookie: {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24, // 1 day
@@ -48,7 +63,7 @@ app.use(session({
 // Middleware to check if user is logged in
 function isLoggedIn(req, res, next) {
     if (req.session.userId) {
-      return next();
+    return next();
     }
     res.redirect('/login');
 }
@@ -103,11 +118,21 @@ app.get('/dashboard', isLoggedIn, (req, res) => {
 
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
-      if (err) {
+    if (err) {
         console.error("Error destroying session:", err);
-      }
-      res.redirect('/login');
+    }
+    res.redirect('/login');
     });
+});
+
+app.get('/admin/users', async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.json(users); // Send the user data back as JSON
+  } catch (error) {
+    console.error('Error getting users:', error);
+    res.status(500).send('Error getting users');
+  }
 });
 
 // Error handling middleware

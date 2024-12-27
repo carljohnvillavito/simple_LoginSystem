@@ -7,19 +7,30 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Register</h1>
+<div class="container">
+    <h1>Register</h1>
         <% if (typeof error !== 'undefined' && error) { %>
-            <p class="error"><%= error %></p>
+        <p class="error"><%= error %></p>
         <% } %>
-        <form action="/register" method="post">
-            <input type="text" name="fullName" placeholder="Full Name" required>
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
-            <button type="submit">Register</button>
-        </form>
-        <p>Already have an account? <a href="/login">Login</a></p>
+    <form id="registerForm" action="/register" method="post">
+        <input type="text" name="fullName" placeholder="Full Name" required>
+        <input type="text" name="username" placeholder="Username" required>
+        <div class="password-input">
+          <input type="password" name="password" placeholder="Password" required id="password">
+          <button type="button" class="show-password" onclick="togglePassword('password')">Show</button>
+        </div>
+         <div class="password-input">
+          <input type="password" name="confirmPassword" placeholder="Confirm Password" required id="confirmPassword">
+          <button type="button" class="show-password" onclick="togglePassword('confirmPassword')">Show</button>
+         </div>
+        <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="/login">Login</a></p>
+    <div id="successPopup" class="popup" style="display:none;">
+        <p id="successMessage"></p>
+        <button id="closePopup">Close</button>
     </div>
+</div>
+ <script src="/js/script.js"></script>
 </body>
 </html>

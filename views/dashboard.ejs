@@ -8,11 +8,18 @@
 </head>
 <body>
     <div id="dashboardWrapper">
-        <div class="container">
-            <h1>Welcome to Your Dashboard</h1>
-            <p>Your user ID: <%= username %></p>
-            <a href="/logout" class="logout-btn">Logout</a>
-            <button class="logout-btn" id="usersButton">Get Users</button>
+        <div class="container chat-container">
+            <h1>Public Group Chat</h1>
+                <div id="messageArea" class="message-area">
+                </div>
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Type your message..." />
+                     <button class="send-button" id="sendButton">Send</button>
+                  </div>
+               <div class="button-container">
+                 <a href="/logout" class="logout-btn">Logout</a>
+                 <button class="logout-btn" id="usersButton">Get Users</button>
+               </div>
         </div>
         <div class="container" id="userDataContainer" style="display:none;">
             <h2>User Data</h2>

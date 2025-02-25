@@ -159,3 +159,30 @@
           margin-bottom: 30px;
            text-align: center;
        }
+.role-badge {
+    background-color: #5bc0de;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.user-item {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 1px solid #444;
+}
+
+.role-admin {
+    background-color: #5cb85c;
+}
+
+.role-moderator {
+    background-color: #f0ad4e;
+}
+
+.role-user {
+    background-color: #777;
+}

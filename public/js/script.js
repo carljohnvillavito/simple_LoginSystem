@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const passwordFields = document.querySelectorAll("input[type='password']");
     const welcomeTextElement = document.getElementById('welcomeText');
     
-    // Fix the welcome text animation to only run once
+    // Fix the welcome text animation
     if (welcomeTextElement) {
         const welcomeMessage = welcomeTextElement.textContent;
         welcomeTextElement.textContent = '';
@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 welcomeTextElement.textContent = welcomeMessage.substring(0, index + 1);
                 setTimeout(() => typeText(index+1), 30);
             }
-            // Remove the recursive call that clears and restarts the animation
         }
         typeText(0);
     }
@@ -73,31 +72,26 @@ document.addEventListener('DOMContentLoaded', function() {
             successPopup.style.display = 'none';
         });
     }
-});
 
-function togglePassword(inputId) {
-    const passwordInput = document.getElementById(inputId);
-    if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-    } else {
-        passwordInput.type = "password";
-    }
-}
-
-// Only add this event listener when the button exists
-document.addEventListener('DOMContentLoaded', function() {
+    // User button with admin check
     const usersButton = document.getElementById('usersButton');
     if (usersButton) {
         usersButton.addEventListener('click', function(event) {
             event.preventDefault();
+            
             fetch('/admin/users')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Unauthorized');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     const userDataContainer = document.getElementById('userDataContainer');
-                    userDataContainer.style.display = 'block'; // Make container visible
+                    userDataContainer.style.display = 'block';
 
                     const userDataDiv = document.getElementById('userData');
-                    userDataDiv.innerHTML = ''; // Clear previous data
+                    userDataDiv.innerHTML = '';
 
                     data.forEach(user => {
                         const userDiv = document.createElement('div');
@@ -130,7 +124,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         userDataDiv.appendChild(userDiv);
                     });
                 })
-                .catch(error => console.error('Error getting users:', error));
+                .catch(error => {
+                    console.error('Error getting users:', error);
+                    if (error.message === 'Unauthorized') {
+                        alert('You do not have permission to access this feature.');
+                    }
+                });
         });
     }
 });
+
+function togglePassword(inputId) {
+    const passwordInput = document.getElementById(inputId);
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+    } else {
+        passwordInput.type = "password";
+    }
+}

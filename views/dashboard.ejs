@@ -10,6 +10,9 @@
     <div id="dashboardWrapper">
         <div class="container welcome-container">
            <h1 id="welcomeText"><%= welcomeMessage %></h1>
+           <% if (typeof role !== 'undefined' && role !== 'user') { %>
+              <p class="role-badge">Role: <%= role %></p>
+           <% } %>
            <div class="button-container">
              <a href="/logout" class="logout-btn">Logout</a>
              <% if (isAdmin) { %>

@@ -12,7 +12,9 @@
            <h1 id="welcomeText"><%= welcomeMessage %></h1>
            <div class="button-container">
              <a href="/logout" class="logout-btn">Logout</a>
-             <button class="logout-btn" id="usersButton">Get Users</button>
+             <% if (isAdmin) { %>
+               <button class="logout-btn" id="usersButton">Get Users</button>
+             <% } %>
            </div>
         </div>
         <div class="container" id="userDataContainer" style="display:none;">
